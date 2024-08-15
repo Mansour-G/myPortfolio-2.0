@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useFrame, useThree } from "@react-three/fiber";
+import {Canvas,  useFrame, useThree } from "@react-three/fiber";
 import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -258,17 +258,7 @@ const ShaderMaterial = ({
   const material = useMemo(() => {
     const materialObject = new THREE.ShaderMaterial({
       vertexShader: `
-      precision mediump float;
-      in vec2 coordinates;
-      uniform vec2 u_resolution;
-      out vec2 fragCoord;
-      void main(){
-        float x = position.x;
-        float y = position.y;
-        gl_Position = vec4(x, y, 0.0, 1.0);
-        fragCoord = (position.xy + vec2(1.0)) * 0.5 * u_resolution;
-        fragCoord.y = u_resolution.y - fragCoord.y;
-      }
+        // ... (vertex shader code) ...
       `,
       fragmentShader: source,
       uniforms: getUniforms(),
@@ -281,21 +271,23 @@ const ShaderMaterial = ({
     return materialObject;
   }, [size.width, size.height, source]);
 
-  // return (
-  //   // <THREE.Mesh ref={ref as any}>
-  //   //   <planeGeometry args={[2, 2]} />
-  //   //   <primitive object={material} attach="material" />
-  //   // </THREE.Mesh>
-  // );
+  return (
+    // Render the plane geometry with the material
+    <mesh ref={ref as any}>
+      <planeGeometry args={[2, 2]} />
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
 };
 
 const Shader: React.FC<ShaderProps> = ({ source, uniforms, maxFps = 60 }) => {
   return (
-    <canvas className="absolute inset-0  h-full w-full">
-      <ShaderMaterial source={source} uniforms={uniforms} maxFps={maxFps} ></ShaderMaterial>
-    </canvas>
+    <Canvas  className="absolute inset-0 h-full w-full">
+      <ShaderMaterial source={source} uniforms={uniforms} maxFps={maxFps} />
+    </Canvas>
   );
 };
+
 interface ShaderProps {
   source: string;
   uniforms: {
